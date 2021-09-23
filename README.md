@@ -13,5 +13,6 @@ Click icon to list all the VMs on your Mac, and click the name to start your VM.
 ## 编译 Build
 - pyinstaller(>=4.5.1)  
 ```
+pip install rumps
 pyinstaller PDrunner.spec
 ```
