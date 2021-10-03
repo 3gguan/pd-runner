@@ -20,7 +20,7 @@ def resource_path(relative_path):
 def trans(string):
 	zh_Hans_CN = {"Quit":u"退出", "No VMs":u"无虚拟机", "Start all VMs":u"全部启动", "Stop all VMs":u"全部停止"}
 	try:
-		text = locals()['zh_Hans_CN'][string]
+		text = locals()[lang][string]
 	except:
 		text = string
 	return text
