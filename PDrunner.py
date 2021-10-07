@@ -5,7 +5,7 @@ import sys
 import re
 import rumps
 from AppKit import NSScreen, NSLocale
-version = '0.1.0'
+version = '0.1.1'
 lang = NSLocale.preferredLanguages()[0].replace('-','_')
 
 # pyinstaller资源目录访问函数
