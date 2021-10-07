@@ -18,7 +18,7 @@ def resource_path(relative_path):
 
 # 本地化字符串函数
 def trans(string):
-	zh_Hans_CN = {"Quit":u"退出", "No VMs":u"无虚拟机", "Start all VMs":u"全部启动", "Stop all VMs":u"全部停止"}
+	zh_Hans_CN = {"Quit":u"退出", "About":u"关于", "No VMs":u"无虚拟机", "Start all VMs":u"全部启动", "Stop all VMs":u"全部停止"}
 	try:
 		text = locals()[lang][string]
 	except:
@@ -56,9 +56,10 @@ class PDrunner(rumps.App):
 		self.quit_button = trans("Quit")
 		self.startall_button = rumps.MenuItem(title=trans("Start all VMs"), callback=self.startall)
 		self.stopall_button = rumps.MenuItem(title=trans("Stop all VMs"), callback=self.stopall)
+		self.about_button = rumps.MenuItem(title=trans("About")+"...", callback=self.about)
 		self.novm = rumps.MenuItem(title=trans("No VMs"))
 		self.novm.state = 0
-		menu = [None,self.startall_button,self.stopall_button,None]
+		menu = [None,self.startall_button,self.stopall_button,None,self.about_button]
 		vmlist.extend(menu)
 		if vms == '':
 			self.menu = [self.novm,None]
@@ -78,6 +79,9 @@ class PDrunner(rumps.App):
 		for vm in vmlist:
 			os.popen("/usr/local/bin/prlctl resume '"+vm+"'")
 			os.popen("/usr/local/bin/prlctl stop '"+vm+"'")
+	
+	def about(self, _):
+		rumps.alert(title=trans("About"), message="PDrunner v"+version+"\nby: lihaoyun6",ok="OK").run()
 	
 if __name__ == "__main__":
 	PDrunner().run()
