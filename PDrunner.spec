@@ -38,6 +38,6 @@ app = BUNDLE(exe,
           info_plist={
            'NSHighResolutionCapable': True,
            'LSUIElement': True,
-           'CFBundleShortVersionString': '0.1.0',
+           'CFBundleShortVersionString': '0.1.1',
            'NSHumanReadableCopyright': u'Copyright (C) 2021 lihaoyun6. All rights reserved.'
            })
