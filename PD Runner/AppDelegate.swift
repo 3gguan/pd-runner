@@ -11,19 +11,20 @@ import Cocoa
 class AppDelegate: NSObject, NSApplicationDelegate {
 
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
+    let menu = NSMenu()
     
     func applicationDidFinishLaunching(_ aNotification: Notification){
         // Insert code here to initialize your application
         if let button = statusItem.button {
           button.image = NSImage(named:NSImage.Name("MenuBarIcon"))
-          //button.action = #selector(startVM(_:))
         }
         checkUser()
         constructMenu()
+        setPDST(nil)
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        // Insert code here to tear down your application
+        runShell("kill -9 `ps x -o pid,command|grep PDST.scpt|grep -v grep|awk '{print $1}'`")
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
@@ -62,6 +63,26 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         runShell("date $(date -j -f %s $((`date +%s`+315360000)) +%m%d%H%M%Y.%S)")
     }
     
+    @objc func setPDST(_ sender: Any?) {
+        var PDST = UserDefaults.standard.bool(forKey: "PDST")
+        if sender == nil{
+            PDST = !UserDefaults.standard.bool(forKey: "PDST")
+        }
+        if PDST != true{
+            menu.item(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.on
+            UserDefaults.standard.set(true, forKey: "PDST")
+            let scriptPath = Bundle.main.resourcePath! + "/PDST.scpt"
+            runShell("osascript \""+scriptPath+"\"&")
+        }else{
+            if sender != nil{
+                menu.item(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.off
+                UserDefaults.standard.set(false, forKey: "PDST")
+                runShell("kill -9 `ps x -o pid,command|grep PDST.scpt|grep -v grep|awk '{print $1}'`")
+            }
+        }
+        UserDefaults.standard.synchronize()
+    }
+
     @discardableResult
     func runShell(_ command: String) -> Int32 {
         let task = Process()
@@ -88,19 +109,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     
     func checkUser(){
         let workspace = NSWorkspace.shared
-            let appPath = workspace.fullPath(forApplication: "Parallels Desktop")
-            if let appPath = appPath {
-                let appBundle = Bundle(path: appPath)
-                let pdVersion = appBundle?.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
-                let comp = pdVersion.compare("17.1.0", options: .numeric)
-                if comp == ComparisonResult.orderedDescending||comp == ComparisonResult.orderedSame{
-                    let user = runShellAndOutput("whoami").output!
-                    if user != "root"{
-                        runShell("/usr/bin/osascript -e 'do shell script \""+CommandLine.arguments[0].replacingOccurrences(of: " ", with: "\\\\ ")+" "+user+"\" with prompt \""+NSLocalizedString("For Parallels Desktop 17.1.0 or later, PD runner need to run with administrator privileges.", comment: "提权提示")+"\" with administrator privileges'&")
-                        exit(1)
-                    }
+        let appPath = workspace.fullPath(forApplication: "Parallels Desktop")
+        if let appPath = appPath {
+            let appBundle = Bundle(path: appPath)
+            let pdVersion = appBundle?.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
+            let comp = pdVersion.compare("17.2.0", options: .numeric)
+            if comp == ComparisonResult.orderedDescending||comp == ComparisonResult.orderedSame{
+                let user = runShellAndOutput("whoami").output!
+                if user != "root"{
+                    runShell("/usr/bin/osascript -e 'do shell script \""+CommandLine.arguments[0].replacingOccurrences(of: " ", with: "\\\\ ")+" "+user+"\" with prompt \""+NSLocalizedString("For Parallels Desktop 17.1.0 or later, PD runner need to run with administrator privileges.", comment: "提权提示")+"\" with administrator privileges'&")
+                    exit(1)
                 }
             }
+        }
     }
     
     func getUser() -> String{
@@ -113,7 +134,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func constructMenu() {
-        let menu = NSMenu()
         let vmlist = runShellAndOutput("sudo -u "+getUser()+" /usr/local/bin/prlctl list -ao name 2>/dev/null").output!.components(separatedBy: "\n")
         if vmlist[0] == "NAME" {
             for vm in vmlist[1..<vmlist.count] {
@@ -128,7 +148,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             menu.addItem(withTitle: NSLocalizedString("No VMs", comment: "未找到任何已安装的虚拟机"), action:nil, keyEquivalent: "")
         }
         menu.addItem(NSMenuItem.separator())
+        menu.addItem(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"), action: #selector(AppDelegate.setPDST(_:)), keyEquivalent: "")
         menu.addItem(withTitle: NSLocalizedString("About PD Runner", comment: "关于"), action: #selector(AppDelegate.aboutDialog(_:)), keyEquivalent: "")
+        menu.addItem(NSMenuItem.separator())
         menu.addItem(withTitle: NSLocalizedString("Quit PD Runner", comment: "退出"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
         statusItem.menu = menu
     }

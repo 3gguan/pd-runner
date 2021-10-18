@@ -10,4 +10,5 @@
 "No VMs" = "无虚拟机";
 "Start all VMs" = "全部启动";
 "Stop all VMs" = "全部停止";
+"Kill Purchase UI" = "自动关闭付费弹窗";
 "For Parallels Desktop 17.1.0 or later, PD runner need to run with administrator privileges." = "对于 Parallels Desktop 17.1.0 或更高版本\nPD runner 需要管理员权限才能正常工作";

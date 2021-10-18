@@ -11,6 +11,7 @@
 		18319563270F001C0077CDFC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18319562270F001C0077CDFC /* Assets.xcassets */; };
 		18319566270F001C0077CDFC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18319564270F001C0077CDFC /* Main.storyboard */; };
 		1876D249270F335F0053620E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1876D24B270F335F0053620E /* Localizable.strings */; };
+		18FFB633271D5DBF00041A41 /* PDST.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 18FFB632271D5DBF00041A41 /* PDST.scpt */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +41,7 @@
 		1831956C270F001C0077CDFC /* PD RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PD RunnerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		18319576270F001C0077CDFC /* PD RunnerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PD RunnerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1876D24A270F335F0053620E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		18FFB632271D5DBF00041A41 /* PDST.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = PDST.scpt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -89,6 +91,7 @@
 			isa = PBXGroup;
 			children = (
 				1831955E270F001B0077CDFC /* AppDelegate.swift */,
+				18FFB632271D5DBF00041A41 /* PDST.scpt */,
 				18319562270F001C0077CDFC /* Assets.xcassets */,
 				18319564270F001C0077CDFC /* Main.storyboard */,
 				1876D24B270F335F0053620E /* Localizable.strings */,
@@ -207,6 +210,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				18FFB633271D5DBF00041A41 /* PDST.scpt in Resources */,
 				18319563270F001C0077CDFC /* Assets.xcassets in Resources */,
 				1876D249270F335F0053620E /* Localizable.strings in Resources */,
 				18319566270F001C0077CDFC /* Main.storyboard in Resources */,
@@ -418,6 +422,7 @@
 				DEVELOPMENT_TEAM = L4T783637F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "PD-Runner-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 lihaoyun6. All rights reserved.";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -426,8 +431,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.1.4;
-				PRODUCT_BUNDLE_IDENTIFIER = "lihaoyun6.PD-Runner";
+				MARKETING_VERSION = 0.1.5;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.lihaoyun6.PD-Runner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -446,6 +451,7 @@
 				DEVELOPMENT_TEAM = L4T783637F;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "PD-Runner-Info.plist";
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "Copyright © 2021 lihaoyun6. All rights reserved.";
 				INFOPLIST_KEY_NSMainStoryboardFile = Main;
 				INFOPLIST_KEY_NSPrincipalClass = NSApplication;
@@ -454,8 +460,8 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.1.4;
-				PRODUCT_BUNDLE_IDENTIFIER = "lihaoyun6.PD-Runner";
+				MARKETING_VERSION = 0.1.5;
+				PRODUCT_BUNDLE_IDENTIFIER = "com.lihaoyun6.PD-Runner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
