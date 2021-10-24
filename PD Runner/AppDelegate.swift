@@ -13,7 +13,6 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
     let menu = NSMenu()
     let scriptPath = Bundle.main.resourcePath! + "/PDST.scpt"
-    var windowController : NSWindowController?
     
     func applicationDidFinishLaunching(_ aNotification: Notification){
         // Insert code here to initialize your application
