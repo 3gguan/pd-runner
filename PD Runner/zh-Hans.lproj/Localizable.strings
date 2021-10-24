@@ -8,7 +8,8 @@
 "Quit PD Runner" = "退出 PD Runner";
 "About PD Runner" = "关于 PD Runner";
 "No VMs" = "无虚拟机";
-"Start all VMs" = "全部启动";
-"Stop all VMs" = "全部停止";
-"Kill Purchase UI" = "自动关闭付费弹窗";
+"No PD" = "未安装PD";
+"Start all VMs" = "全部开机";
+"Stop all VMs" = "全部关机";
+"Kill Purchase UI" = "自动关闭促销弹窗";
 "For Parallels Desktop 17.1.0 or later, PD runner need to run with administrator privileges." = "对于 Parallels Desktop 17.1.0 或更高版本\nPD runner 需要管理员权限才能正常工作";
