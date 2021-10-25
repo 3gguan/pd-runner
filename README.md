@@ -10,4 +10,4 @@ Click icon to list all the VMs on your Mac, and click the name to start your VM.
 
 ![menu](./menu.png) ![menu](./menu_en.png)
 
-###本项目仅用于学习研究使用, 请支持正版
+### 本项目仅用于学习研究使用, 请支持正版!
