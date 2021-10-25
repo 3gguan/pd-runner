@@ -37,9 +37,19 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         NSApp.orderFrontStandardAboutPanel(self)
     }
     
+    @objc func updateMenu(_ sender: Any?) {
+        constructMenu()
+    }
+    
+    @objc func openGithub(_ sender: Any?) {
+        let url = URL(string: "https://github.com/lihaoyun6/PD-Runner")
+        NSWorkspace.shared.open(url!)
+    }
+    
     @objc func startVM(_ sender: NSMenuItem) {
         runPD()
-        runShell("sudo -u "+getUser()+" /usr/local/bin/prlctl start \""+sender.title+"\"")
+        let ret = runShellAndOutput("sudo -u "+getUser()+" /usr/local/bin/prlctl start \""+sender.title+"\" 2>&1").output!.components(separatedBy: "\n")
+        skipProCheck(ret: ret.last!,vm: sender.title)
         runShell("date $(date -j -f %s $((`date +%s`+315360000)) +%m%d%H%M%Y.%S)")
         PDST(cmd: "restart")
         NSWorkspace.shared.launchApplication("Parallels Desktop")
@@ -49,20 +59,21 @@ class AppDelegate: NSObject, NSApplicationDelegate {
         let vmlist = runShellAndOutput("sudo -u "+getUser()+" /usr/local/bin/prlctl list -ao name 2>/dev/null").output!.components(separatedBy: "\n")
         runPD()
         for vm in vmlist[1..<vmlist.count] {
-            runShell("sudo -u "+getUser()+" /usr/local/bin/prlctl start \""+vm+"\"")
+            let ret = runShellAndOutput("sudo -u "+getUser()+" /usr/local/bin/prlctl start \""+vm+"\" 2>&1").output!.components(separatedBy: "\n")
+            skipProCheck(ret: ret.last!,vm: vm)
         }
         runShell("date $(date -j -f %s $((`date +%s`+315360000)) +%m%d%H%M%Y.%S)")
+        PDST(cmd: "restart")
         NSWorkspace.shared.launchApplication("Parallels Desktop")
     }
     
     @objc func stopAll(_ sender: Any?) {
         let unstoppedVMs = runShellAndOutput("sudo -u "+getUser()+" /usr/local/bin/prlctl list -ao status,-,name 2>/dev/null|grep -v stopped|sed 's/.*- *//g'").output!.components(separatedBy: "\n")
-        runPD()
         for vm in unstoppedVMs[1..<unstoppedVMs.count] {
             runShell("sudo -u "+getUser()+" /usr/local/bin/prlctl resume \""+vm+"\"")
             runShell("sudo -u "+getUser()+" /usr/local/bin/prlctl stop \""+vm+"\"&")
         }
-        runShell("date $(date -j -f %s $((`date +%s`+315360000)) +%m%d%H%M%Y.%S)")
+        PDST(cmd: "restart")
     }
     
     @objc func setPDST(_ sender: Any?) {
@@ -107,7 +118,28 @@ class AppDelegate: NSObject, NSApplicationDelegate {
             runShell("date $(date -j -f %s $((`date +%s`-315360000)) +%m%d%H%M%Y.%S)")
         }else{
             NSWorkspace.shared.launchApplication("Parallels Desktop")
-            runShell("sleep 3;date $(date -j -f %s $((`date +%s`-315360000)) +%m%d%H%M%Y.%S)")
+            runShell("sleep 2;date $(date -j -f %s $((`date +%s`-315360000)) +%m%d%H%M%Y.%S)")
+        }
+    }
+    
+    func skipProCheck(ret:String,vm:String){
+        if (ret == "The command is available only in Parallels Desktop for Mac Pro or Business Edition."){
+            runShell("killall prl_client_app")
+            runShell("date $(date -j -f %s $((`date +%s`+315360000)) +%m%d%H%M%Y.%S)")
+            var apps = [String]()
+            for app in NSWorkspace.shared.runningApplications
+            {
+                if(app.activationPolicy == .regular){
+                    apps.append(app.localizedName!)
+                }
+            }
+            if apps.contains("Parallels Desktop"){
+                runShell("date $(date -j -f %s $((`date +%s`-315360000)) +%m%d%H%M%Y.%S)")
+            }else{
+                NSWorkspace.shared.launchApplication("Parallels Desktop")
+                runShell("sleep 4;date $(date -j -f %s $((`date +%s`-315360000)) +%m%d%H%M%Y.%S)")
+            }
+            runShell("sudo -u "+getUser()+" /usr/local/bin/prlctl start \""+vm+"\"")
         }
     }
     
@@ -163,6 +195,7 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     }
     
     func constructMenu() {
+        menu.removeAllItems()
         let vmlist = runShellAndOutput("sudo -u "+getUser()+" /usr/local/bin/prlctl list -ao name 2>/dev/null").output!.components(separatedBy: "\n")
         if vmlist[0] == "NAME" {
             for vm in vmlist[1..<vmlist.count] {
@@ -172,15 +205,23 @@ class AppDelegate: NSObject, NSApplicationDelegate {
                 menu.addItem(withTitle: NSLocalizedString("No VMs", comment: "未找到任何已安装的虚拟机"), action:nil, keyEquivalent: "")
             }else if vmlist.count > 1 {
                 menu.addItem(NSMenuItem.separator())
-                menu.addItem(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"), action: #selector(AppDelegate.setPDST(_:)), keyEquivalent: "")
-                menu.addItem(withTitle: NSLocalizedString("Stop all VMs", comment: "关闭所有虚拟机"), action: #selector(AppDelegate.stopAll(_:)), keyEquivalent: "")
-            }else if vmlist.count > 2 {
                 menu.addItem(withTitle: NSLocalizedString("Start all VMs", comment: "启动所有虚拟机"), action: #selector(AppDelegate.startAll(_:)), keyEquivalent: "")
+                menu.addItem(withTitle: NSLocalizedString("Stop all VMs", comment: "关闭所有虚拟机"), action: #selector(AppDelegate.stopAll(_:)), keyEquivalent: "")
+                menu.addItem(NSMenuItem.separator())
+                menu.addItem(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"), action: #selector(AppDelegate.setPDST(_:)), keyEquivalent: "")
+                let PDSTstatus = UserDefaults.standard.bool(forKey: "PDST")
+                if PDSTstatus == true{
+                    menu.item(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.on
+                }else{
+                    menu.item(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.off
+                }
             }
         } else {
             menu.addItem(withTitle: NSLocalizedString("No PD", comment: "未安装PD"), action:nil, keyEquivalent: "")
         }
+        menu.addItem(withTitle: NSLocalizedString("Update VM List", comment: "更新虚拟机列表"), action: #selector(AppDelegate.updateMenu(_:)), keyEquivalent: "")
         menu.addItem(NSMenuItem.separator())
+        menu.addItem(withTitle: NSLocalizedString("Github Page", comment: "访问github页面"), action: #selector(AppDelegate.openGithub(_:)), keyEquivalent: "")
         menu.addItem(withTitle: NSLocalizedString("About PD Runner", comment: "关于"), action: #selector(AppDelegate.aboutDialog(_:)), keyEquivalent: "")
         menu.addItem(withTitle: NSLocalizedString("Quit PD Runner", comment: "退出"), action: #selector(NSApplication.terminate(_:)), keyEquivalent: "")
         statusItem.menu = menu

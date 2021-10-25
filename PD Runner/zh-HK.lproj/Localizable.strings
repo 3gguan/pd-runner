@@ -11,5 +11,7 @@
 "No PD" = "沒有安裝PD";
 "Start all VMs" = "全部開機";
 "Stop all VMs" = "全部關機";
-"Kill Purchase UI" = "自動關閉付費視窗";
+"Kill Purchase UI" = "關閉付費視窗";
+"Update VM List" = "更新虛擬機列表";
+"Github Page" = "Github頁面";
 "For Parallels Desktop 17.1.0 or later, PD runner need to run with administrator privileges." = "對於 Parallels Desktop 17.1.0 或更高版本\nPD runner 需要管理員權限才能正常工作";
