@@ -11,6 +11,7 @@
 		18319563270F001C0077CDFC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 18319562270F001C0077CDFC /* Assets.xcassets */; };
 		18319566270F001C0077CDFC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 18319564270F001C0077CDFC /* Main.storyboard */; };
 		1876D249270F335F0053620E /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1876D24B270F335F0053620E /* Localizable.strings */; };
+		188C50D62728358000392BA4 /* Credits.rtf in Resources */ = {isa = PBXBuildFile; fileRef = 188C50D82728358000392BA4 /* Credits.rtf */; };
 		18FFB633271D5DBF00041A41 /* PDST.scpt in Resources */ = {isa = PBXBuildFile; fileRef = 18FFB632271D5DBF00041A41 /* PDST.scpt */; };
 /* End PBXBuildFile section */
 
@@ -41,6 +42,10 @@
 		1831956C270F001C0077CDFC /* PD RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PD RunnerTests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		18319576270F001C0077CDFC /* PD RunnerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "PD RunnerUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1876D24A270F335F0053620E /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		188C50D72728358000392BA4 /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = "zh-Hans"; path = "zh-Hans.lproj/Credits.rtf"; sourceTree = "<group>"; };
+		188C50D92728358600392BA4 /* zh-HK */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = "zh-HK"; path = "zh-HK.lproj/Credits.rtf"; sourceTree = "<group>"; };
+		188C50DA2728358700392BA4 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = "zh-Hant"; path = "zh-Hant.lproj/Credits.rtf"; sourceTree = "<group>"; };
+		188C50DC272835F000392BA4 /* Base */ = {isa = PBXFileReference; lastKnownFileType = text.rtf; name = Base; path = Base.lproj/Credits.rtf; sourceTree = "<group>"; };
 		18FFB632271D5DBF00041A41 /* PDST.scpt */ = {isa = PBXFileReference; lastKnownFileType = file; path = PDST.scpt; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -94,6 +99,7 @@
 				18FFB632271D5DBF00041A41 /* PDST.scpt */,
 				18319562270F001C0077CDFC /* Assets.xcassets */,
 				18319564270F001C0077CDFC /* Main.storyboard */,
+				188C50D82728358000392BA4 /* Credits.rtf */,
 				1876D24B270F335F0053620E /* Localizable.strings */,
 			);
 			path = "PD Runner";
@@ -165,7 +171,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1300;
-				LastUpgradeCheck = 1300;
+				LastUpgradeCheck = 1310;
 				TargetAttributes = {
 					1831955A270F001B0077CDFC = {
 						CreatedOnToolsVersion = 13.0;
@@ -210,6 +216,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				188C50D62728358000392BA4 /* Credits.rtf in Resources */,
 				18FFB633271D5DBF00041A41 /* PDST.scpt in Resources */,
 				18319563270F001C0077CDFC /* Assets.xcassets in Resources */,
 				1876D249270F335F0053620E /* Localizable.strings in Resources */,
@@ -288,6 +295,17 @@
 				181ED133270F5F69008E95E4 /* zh-HK */,
 			);
 			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		188C50D82728358000392BA4 /* Credits.rtf */ = {
+			isa = PBXVariantGroup;
+			children = (
+				188C50D72728358000392BA4 /* zh-Hans */,
+				188C50D92728358600392BA4 /* zh-HK */,
+				188C50DA2728358700392BA4 /* zh-Hant */,
+				188C50DC272835F000392BA4 /* Base */,
+			);
+			name = Credits.rtf;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -420,6 +438,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = L4T783637F;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "PD-Runner-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -431,7 +450,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.1.7;
+				MARKETING_VERSION = 0.1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lihaoyun6.PD-Runner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
@@ -449,6 +468,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				COMBINE_HIDPI_IMAGES = YES;
 				DEVELOPMENT_TEAM = L4T783637F;
+				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "PD-Runner-Info.plist";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -460,7 +480,7 @@
 					"@executable_path/../Frameworks",
 				);
 				MACOSX_DEPLOYMENT_TARGET = 10.15;
-				MARKETING_VERSION = 0.1.7;
+				MARKETING_VERSION = 0.1.8;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.lihaoyun6.PD-Runner";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;

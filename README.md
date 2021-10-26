@@ -1,6 +1,7 @@
 # PDrunner
-适用于Parallels Desktop的虚拟机启动器  
-A VM launcher for Parallels Desktop
+适用于Parallels Desktop的启动器, 可以无视试用期限强制启动客户机 (支持17.1.0)  
+A tool for Parallels Desktop can start VMs even expired (Support for 17.1.0)
+### 本项目仅用于学习研究使用, 请支持正版!  
 
 ## 使用 Usage
 PDrunner是一个菜单栏APP, 启动后会在菜单栏显示一个图标.  
@@ -8,6 +9,7 @@ PDrunner是一个菜单栏APP, 启动后会在菜单栏显示一个图标.
 PDrunner will show an icon in the menu bar.  
 Click icon to list all the VMs on your Mac, and click the name to start your VM.  
 
-![menu](./menu.png) ![menu](./menu_en.png)
+<img src="./img/menu_hans.png" width=220 align=center />
+<img src="././img/menu_hant.png" width=220 align=center />
+<img src="./img/menu_enus.png" width=220 align=center />
 
-### 本项目仅用于学习研究使用, 请支持正版!
