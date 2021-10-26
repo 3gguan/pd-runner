@@ -9,7 +9,5 @@ PDrunner是一个菜单栏APP, 启动后会在菜单栏显示一个图标.
 PDrunner will show an icon in the menu bar.  
 Click icon to list all the VMs on your Mac, and click the name to start your VM.  
 
-<img src="./img/menu_hans.png" width=220 align=center />
-<img src="././img/menu_hant.png" width=220 align=center />
-<img src="./img/menu_enus.png" width=220 align=center />
+<img src="./img/menu_hans.png" width=220 align=center /> <img src="././img/menu_hant.png" width=220 align=center /> <img src="./img/menu_enus.png" width=220 align=center />
 
