@@ -1,0 +1,19 @@
+/*
+  Localizable.strings
+  PD Runner
+
+  Created by lihaoyun6 on 2021/10/7.
+  
+*/
+"Quit" = "退出";
+"About PD Runner" = "关于 PD Runner";
+"No VMs were found" = "无虚拟机";
+"Parallels Desktop not installed" = "未安装Parallels Desktop";
+"Batch action" = "批量操作";
+"Start all VMs" = "全部开机";
+"Stop all VMs" = "全部关机";
+"Block trial alert" = "屏蔽促销弹窗";
+"Update VM List" = "更新虚拟机列表";
+"Failed to install helper!" = "安装帮助程序失败";
+"Click OK to exit" = "点击OK退出程序";
+"For Parallels Desktop 17.1.0 or later, PD runner need to run with administrator privileges." = "对于 Parallels Desktop 17.1.0 或更高版本\nPD runner 需要管理员权限才能正常工作";
