@@ -16,4 +16,5 @@
 "Update VM List" = "更新虚拟机列表";
 "Failed to install helper!" = "安装帮助程序失败";
 "Click OK to exit" = "点击OK退出程序";
+"Launch at Login" = "登录时启动";
 "For Parallels Desktop 17.1.0 or later, PD runner need to run with administrator privileges." = "对于 Parallels Desktop 17.1.0 或更高版本\nPD runner 需要管理员权限才能正常工作";

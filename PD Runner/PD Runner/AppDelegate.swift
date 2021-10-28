@@ -8,43 +8,19 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     // MARK: Variables
 
     private var currentHelperConnection: NSXPCConnection?
-
-    @objc dynamic private var currentHelperAuthData: NSData?
-    private let currentHelperAuthDataKeyPath: String
-
-    @objc dynamic private var helperIsInstalled = false
-    private let helperIsInstalledKeyPath: String
-
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
     var timer: Timer?
     let menu = NSMenu()
     let scriptPath = Bundle.main.resourcePath! + "/PDST.scpt"
+    let appPath = Bundle.main.bundlePath
     
     
     // MARK: -
     // MARK: NSApplicationDelegate Methods
     
-    override init() {
-        self.currentHelperAuthDataKeyPath = NSStringFromSelector(#selector(getter: self.currentHelperAuthData))
-        self.helperIsInstalledKeyPath = NSStringFromSelector(#selector(getter: self.helperIsInstalled))
-        super.init()
-    }
-    
     func applicationDidFinishLaunching(_ aNotification: Notification){
         // Insert code here to initialize your application
-        checkPDVersion()
-        
-        do {
-            try HelperAuthorization.authorizationRightsUpdateDatabase()
-        } catch {
-            log("Failed to update the authorization database rights with error: \(error)")
-        }
-        // Check if the current embedded helper tool is installed on the machine.
-        self.helperStatus() { installed in
-            let status = (installed) ? "Helper Launched" : "Helper Not Launched!"
-            self.log(status)
-        }
-
+        installHelper()
         constructMenu()
         if let button = statusItem.button {
             button.image = NSImage(named:NSImage.Name("MenuBarIcon"))
@@ -54,7 +30,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     }
 
     func applicationWillTerminate(_ aNotification: Notification) {
-        PDST("stop")
+        if UserDefaults.standard.bool(forKey: "PDST") {
+            PDST("stop")
+        }
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool {
@@ -116,7 +94,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     }
     
     @objc func startAll(_ sender: Any?) {
-        let vmlist = runWithOutput("/usr/local/bin/prlctl list -ao name -s uuid 2>/dev/null").output!.components(separatedBy: "\n")
+        let vmlist = runWithOutput("/usr/local/bin/prlctl list -ao name -s mac 2>/dev/null").output!.components(separatedBy: "\n")
         runPD()
         for vm in vmlist[1..<vmlist.count] {
             let ret = runWithOutput("/usr/local/bin/prlctl start \""+vm+"\" 2>&1").output!.components(separatedBy: "\n").last!
@@ -128,7 +106,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     }
     
     @objc func stopAll(_ sender: Any?) {
-        let unstoppedVMs = runWithOutput("/usr/local/bin/prlctl list -ao status,-,name -s uuid 2>/dev/null|grep -v stopped|sed 's/.*- *//g'").output!.components(separatedBy: "\n")
+        let unstoppedVMs = runWithOutput("/usr/local/bin/prlctl list -ao status,-,name -s mac 2>/dev/null|grep -v stopped|sed 's/.*- *//g'").output!.components(separatedBy: "\n")
         for vm in unstoppedVMs[1..<unstoppedVMs.count] {
             run("/usr/local/bin/prlctl resume \""+vm+"\"")
             run("/usr/local/bin/prlctl stop \""+vm+"\"&")
@@ -137,27 +115,58 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     }
     
     @objc func setPDST(_ sender: Any?) {
+        let menuTitle = NSLocalizedString("Block trial alert", comment: "自动关闭购买窗口")
         var PDSTstatus = UserDefaults.standard.bool(forKey: "PDST")
         if sender == nil{
             PDSTstatus = !UserDefaults.standard.bool(forKey: "PDST")
         }
         if PDSTstatus != true{
-            menu.item(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.on
-            UserDefaults.standard.set(true, forKey: "PDST")
-            PDST("start")
+            menu.item(withTitle: menuTitle)?.state = NSControl.StateValue.on
+            if sender != nil{
+                UserDefaults.standard.set(true, forKey: "PDST")
+                UserDefaults.standard.synchronize()
+                PDST("start")
+            }
         }else{
             if sender != nil{
-                menu.item(withTitle: NSLocalizedString("Kill Purchase UI", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.off
+                menu.item(withTitle: menuTitle)?.state = NSControl.StateValue.off
                 UserDefaults.standard.set(false, forKey: "PDST")
+                UserDefaults.standard.synchronize()
                 PDST("stop")
+            }
+        }
+    }
+    
+    @objc func setLoginItem(_ sender: Any?) {
+        let menuTitle = NSLocalizedString("Launch at Login", comment: "登录时启动")
+        let loginItems = runWithOutput("osascript -e 'tell application \"System Events\" to get the name of every login item'").output!.components(separatedBy: ", ")
+        if UserDefaults.standard.bool(forKey: "runAtLogin") != true{
+            menu.item(withTitle: menuTitle)?.state = NSControl.StateValue.on
+            UserDefaults.standard.set(true, forKey: "runAtLogin")
+            if !loginItems.contains("PD Runner"){
+                NSAppleScript(source: "tell application \"System Events\" to make login item with properties {path:\""+appPath+"\", hidden:false}")!.executeAndReturnError(nil)
+            }
+        }else{
+            menu.item(withTitle: menuTitle)?.state = NSControl.StateValue.off
+            UserDefaults.standard.set(false, forKey: "runAtLogin")
+            if loginItems.contains("PD Runner"){
+                NSAppleScript(source: "tell application \"System Events\" to delete login item \"PD Runner\"")!.executeAndReturnError(nil)
             }
         }
         UserDefaults.standard.synchronize()
     }
     
+    func runAtLogin(){
+        let loginItems = runWithOutput("osascript -e 'tell application \"System Events\" to get the name of every login item'").output!.components(separatedBy: ", ")
+        if !loginItems.contains("PD Runner"){
+            NSAppleScript(source: "tell application \"System Events\" to make login item with properties {path:\""+appPath+"\", hidden:false}")!.executeAndReturnError(nil)
+        }
+    }
+    
     // MARK: -
     // MARK: Func Methods
     
+    @discardableResult
     func dialogOKCancel(question: String, text: String) -> Bool {
         let myPopup: NSAlert = NSAlert()
         myPopup.messageText = question
@@ -224,24 +233,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
         }
     }
     
-    func checkPDVersion(){
-        let appBundle = Bundle(path: NSWorkspace.shared.fullPath(forApplication: "Parallels Desktop")!)
-        let pdVersion = appBundle?.object(forInfoDictionaryKey: "CFBundleShortVersionString") as! String
-        let comp = pdVersion.compare("17.1.0", options: .numeric)
-        if [ComparisonResult.orderedDescending,ComparisonResult.orderedSame].contains(comp){
-            if !checkHelper(){
-                if !installHelper(){
-                    _ = dialogOKCancel(question: NSLocalizedString("Failed to install helper!", comment: "安装帮助程序失败"), text: NSLocalizedString("Click OK to exit", comment: "点击OK退出程序"))
-                    exit(1)
-                }
-            }
-        }
-    }
-    
     func constructMenu() {
         menu.removeAllItems()
-        let vmlist = runWithOutput("/usr/local/bin/prlctl list -ao name -s uuid 2>/dev/null").output!.components(separatedBy: "\n")
-        let oslist = runWithOutput("/usr/local/bin/prlctl list -ao ostemplate -s uuid 2>/dev/null").output!.components(separatedBy: "\n")
+        let vmlist = runWithOutput("/usr/local/bin/prlctl list -ao name -s mac 2>/dev/null").output!.components(separatedBy: "\n")
+        let oslist = runWithOutput("/usr/local/bin/prlctl list -ao ostemplate -s mac 2>/dev/null").output!.components(separatedBy: "\n")
         if vmlist[0] == "NAME" {
             if vmlist.count == 1 {
                 menu.addItem(withTitle: NSLocalizedString("No VMs were found", comment: "未找到任何已安装的虚拟机"), action:nil, keyEquivalent: "")
@@ -267,12 +262,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
                 submenu.addItem(withTitle: NSLocalizedString("Start all VMs", comment: "启动所有虚拟机"), action: #selector(AppDelegate.startAll(_:)), keyEquivalent: "")
                 submenu.addItem(withTitle: NSLocalizedString("Stop all VMs", comment: "关闭所有虚拟机"), action: #selector(AppDelegate.stopAll(_:)), keyEquivalent: "")
                 menu.addItem(withTitle: NSLocalizedString("Block trial alert", comment: "自动关闭购买窗口"), action: #selector(AppDelegate.setPDST(_:)), keyEquivalent: "b")
-                let PDSTstatus = UserDefaults.standard.bool(forKey: "PDST")
-                if PDSTstatus == true{
-                    menu.item(withTitle: NSLocalizedString("Block trial alert", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.on
-                }else{
-                    menu.item(withTitle: NSLocalizedString("Block trial alert", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.off
-                }
+                menu.addItem(withTitle: NSLocalizedString("Launch at Login", comment: "登录时启动"), action: #selector(AppDelegate.setLoginItem(_:)), keyEquivalent: "l")
+                if UserDefaults.standard.bool(forKey: "PDST") == true { menu.item(withTitle: NSLocalizedString("Block trial alert", comment: "自动关闭购买窗口"))?.state = NSControl.StateValue.on }
+                if UserDefaults.standard.bool(forKey: "runAtLogin") == true { menu.item(withTitle: NSLocalizedString("Launch at Login", comment: "登录时启动"))?.state = NSControl.StateValue.on }
             }
         } else {
             menu.addItem(withTitle: NSLocalizedString("Parallels Desktop not installed", comment: "未安装PD"), action:nil, keyEquivalent: "")
@@ -291,28 +283,27 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
 
     // MARK: -
     // MARK: Helper Connection Methods
-
-    func installHelper() -> Bool{
-        do {
-            if try self.helperInstaller() {
-                log("Helper installed successfully.")
-                return true
-            } else {
-                log("Failed install helper with unknown error.")
-                return false
-            }
-        } catch {
-            log("Failed to install helper with error: \(error)")
-            return false
-        }
-    }
     
-    func checkHelper() -> Bool {
-        let helperPath = "/Library/PrivilegedHelperTools/com.lihaoyun6.PD-Runner-Helper"
-        if !FileManager.default.fileExists(atPath: helperPath){
-            return false
-        }else{
-            return true
+    func installHelper(){
+        helperStatus() { installed in
+            if !installed {
+                self.log("Helper Not Installed!")
+                do {
+                    if try self.helperInstaller() {
+                        self.log("Helper installed successfully.")
+                    } else {
+                        self.log("Failed install helper with unknown error.")
+                        //self.dialogOKCancel(question: NSLocalizedString("Failed to install helper!", comment: "安装帮助程序失败"), text: NSLocalizedString("Click OK to quit", comment: "点击OK退出程序"))
+                        exit(1)
+                    }
+                } catch {
+                    self.log("Failed to install helper with error: \(error)")
+                    //self.dialogOKCancel(question: NSLocalizedString("Failed to install helper!", comment: "安装帮助程序失败"), text: NSLocalizedString("Click OK to quit", comment: "点击OK退出程序"))
+                    exit(1)
+                }
+            }else{
+                self.log("Helper Installed.")
+            }
         }
     }
     
@@ -361,7 +352,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
                 completion(false)
                 return
         }
-
         helper.getVersion { installedHelperVersion in
             completion(installedHelperVersion == helperVersion)
         }

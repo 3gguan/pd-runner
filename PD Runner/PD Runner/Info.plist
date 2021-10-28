@@ -33,7 +33,7 @@
 	<key>SMPrivilegedExecutables</key>
 	<dict>
 		<key>com.lihaoyun6.PD-Runner-Helper</key>
-		<string>identifier &quot;com.lihaoyun6.PD-Runner-Helper&quot; and anchor apple generic and certificate leaf[subject.CN] = &quot;&quot; and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
+		<string>identifier "com.lihaoyun6.PD-Runner-Helper" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: lihaoyun11@gmail.com (RLYLNV942Y)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
 	</dict>
 </dict>
 </plist>
