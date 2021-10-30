@@ -1,19 +1,25 @@
 import Cocoa
 import ServiceManagement
 
+#if DEBUG
+    let debug = true
+#else
+    let debug = false
+#endif
+
 @NSApplicationMain
 class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
 
     // MARK: -
     // MARK: Variables
 
-    private var currentHelperConnection: NSXPCConnection?
+    var currentHelperConnection: NSXPCConnection?
     var statusItem = NSStatusBar.system.statusItem(withLength:NSStatusItem.squareLength)
     var timer: Timer?
     let menu = NSMenu()
     let scriptPath = Bundle.main.resourcePath! + "/PDST.scpt"
     let appPath = Bundle.main.bundlePath
-    
+    var vmListBak = [String]()
     
     // MARK: -
     // MARK: NSApplicationDelegate Methods
@@ -85,20 +91,26 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     }
     
     @objc func startVM(_ sender: NSMenuItem) {
+        log("Starting VM: "+sender.title)
         runPD()
-        let ret = runWithOutput("/usr/local/bin/prlctl start \""+sender.title+"\" 2>&1").output!.components(separatedBy: "\n").last!
-        skipProCheck(ret: ret,vm: sender.title)
+        let ret = runWithOutput("/usr/local/bin/prlctl start \"\(sender.title)\" 2>&1").output!.components(separatedBy: "\n").last!
+        if skipProCheck(ret){
+            run("/usr/local/bin/prlctl start \"\(sender.title)\"")
+        }
         chTime("+")
         PDST("restart")
         NSWorkspace.shared.launchApplication("Parallels Desktop")
     }
     
     @objc func startAll(_ sender: Any?) {
-        let vmlist = runWithOutput("/usr/local/bin/prlctl list -ao name -s mac 2>/dev/null").output!.components(separatedBy: "\n")
+        let vmList = runWithOutput("/usr/local/bin/prlctl list -ao name -s mac 2>/dev/null").output!.components(separatedBy: "\n")
         runPD()
-        for vm in vmlist[1..<vmlist.count] {
-            let ret = runWithOutput("/usr/local/bin/prlctl start \""+vm+"\" 2>&1").output!.components(separatedBy: "\n").last!
-            skipProCheck(ret: ret,vm: vm)
+        for vm in vmList[1..<vmList.count] {
+            log("Starting VM: "+vm)
+            let ret = runWithOutput("/usr/local/bin/prlctl start \"\(vm)\" 2>&1").output!.components(separatedBy: "\n").last!
+            if skipProCheck(ret){
+                run("/usr/local/bin/prlctl start \"\(vm)\"")
+            }
         }
         chTime("+")
         PDST("restart")
@@ -107,10 +119,16 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     
     @objc func stopAll(_ sender: Any?) {
         let unstoppedVMs = runWithOutput("/usr/local/bin/prlctl list -ao status,-,name -s mac 2>/dev/null|grep -v stopped|sed 's/.*- *//g'").output!.components(separatedBy: "\n")
+        chTime("-")
         for vm in unstoppedVMs[1..<unstoppedVMs.count] {
-            run("/usr/local/bin/prlctl resume \""+vm+"\"")
-            run("/usr/local/bin/prlctl stop \""+vm+"\"&")
+            log("Stoping VM: "+vm)
+            let ret = runWithOutput("/usr/local/bin/prlctl resume \"\(vm)\" 2>&1").output!.components(separatedBy: "\n").last!
+            if skipProCheck(ret){
+                run("/usr/local/bin/prlctl resume \"\(vm)\"")
+            }
+            run("/usr/local/bin/prlctl stop \"\(vm)\"&")
         }
+        chTime("+")
         PDST("restart")
     }
     
@@ -122,13 +140,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
         }
         if PDSTstatus != true{
             menu.item(withTitle: menuTitle)?.state = NSControl.StateValue.on
+            PDST("start")
             if sender != nil{
+                log("Run PDST = on")
                 UserDefaults.standard.set(true, forKey: "PDST")
                 UserDefaults.standard.synchronize()
-                PDST("start")
             }
         }else{
             if sender != nil{
+                log("Run PDST = off")
                 menu.item(withTitle: menuTitle)?.state = NSControl.StateValue.off
                 UserDefaults.standard.set(false, forKey: "PDST")
                 UserDefaults.standard.synchronize()
@@ -140,13 +160,15 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     @objc func setLoginItem(_ sender: Any?) {
         let menuTitle = NSLocalizedString("Launch at Login", comment: "登录时启动")
         let loginItems = runWithOutput("osascript -e 'tell application \"System Events\" to get the name of every login item'").output!.components(separatedBy: ", ")
-        if UserDefaults.standard.bool(forKey: "runAtLogin") != true{
+        if UserDefaults.standard.bool(forKey: "runAtLogin") != true {
+            log("Run at Login = on")
             menu.item(withTitle: menuTitle)?.state = NSControl.StateValue.on
             UserDefaults.standard.set(true, forKey: "runAtLogin")
             if !loginItems.contains("PD Runner"){
-                NSAppleScript(source: "tell application \"System Events\" to make login item with properties {path:\""+appPath+"\", hidden:false}")!.executeAndReturnError(nil)
+                NSAppleScript(source: "tell application \"System Events\" to make login item with properties {path:\"\(appPath)\", hidden:false}")!.executeAndReturnError(nil)
             }
         }else{
+            log("Run at Login = off")
             menu.item(withTitle: menuTitle)?.state = NSControl.StateValue.off
             UserDefaults.standard.set(false, forKey: "runAtLogin")
             if loginItems.contains("PD Runner"){
@@ -154,13 +176,6 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
             }
         }
         UserDefaults.standard.synchronize()
-    }
-    
-    func runAtLogin(){
-        let loginItems = runWithOutput("osascript -e 'tell application \"System Events\" to get the name of every login item'").output!.components(separatedBy: ", ")
-        if !loginItems.contains("PD Runner"){
-            NSAppleScript(source: "tell application \"System Events\" to make login item with properties {path:\""+appPath+"\", hidden:false}")!.executeAndReturnError(nil)
-        }
     }
     
     // MARK: -
@@ -179,28 +194,38 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     
     func sudo(_ cmd: String){
         guard let helper = self.helper(nil) else { return }
-        helper.runTask(arguments: cmd) {(exitCode) in self.log("Command exit code: \(exitCode)")}
+        helper.runTask(arguments: cmd) {(exitCode) in
+            self.log("Command: [\(cmd)] with exit code: \(exitCode)")
+        }
     }
     
     func loop() {
         timer = Timer(timeInterval: 8, repeats: true, block: {timer in self.loopFireHandler(timer)})
+        log("Run loop...")
         RunLoop.main.add(timer!, forMode: .common)
     }
     
     func chTime(_ cmd: String){
-        sudo("date $(date -j -f %s $((`date +%s`"+cmd+"315360000)) +%m%d%H%M%Y.%S)")
         if cmd == "+"{
+            log("Right time")
+            sudo("date $(date -j -f %s $((`date +%s`+315360000)) +%m%d%H%M%Y.%S)")
             sudo("sntp -sS time.apple.com >/dev/null 2>&1")
+        }else if cmd == "-"{
+            log("Go back")
+            sudo("date $(date -j -f %s $((`date +%s`-315360000)) +%m%d%H%M%Y.%S) >/dev/null 2>&1")
         }
     }
     
     func PDST(_ cmd:String) {
         if (cmd == "start"){
-            run("/usr/bin/osascript \""+scriptPath+"\"&")
+            log("Run PDST...")
+            run("/usr/bin/osascript \"\(scriptPath)\"&")
         }else if (cmd == "restart"){
+            log("reRun PDST...")
             run("kill -9 `ps ax -o pid,command|grep PDST.scpt|grep -v grep|awk '{print $1}'`")
-            run("/usr/bin/osascript \""+scriptPath+"\"&")
+            run("/usr/bin/osascript \"\(scriptPath)\"&")
         }else if (cmd == "stop"){
+            log("Stop PDST")
             run("kill -9 `ps ax -o pid,command|grep PDST.scpt|grep -v grep|awk '{print $1}'`")
         }
     }
@@ -214,44 +239,58 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
             }
         }
         if apps.contains("Parallels Desktop"){
+            log("Parallels Desktop is running...")
             chTime("-")
         }else{
+            log("Launching Parallels Desktop...")
             NSWorkspace.shared.launchApplication("Parallels Desktop")
             sleep(2)
             chTime("-")
         }
     }
     
-    func skipProCheck(ret:String,vm:String){
+    func skipProCheck(_ ret:String) -> Bool{
+        log(ret)
         if (ret == "The command is available only in Parallels Desktop for Mac Pro or Business Edition."){
+            log("Skipping Pro/Business Edition detection...")
             run("killall prl_client_app")
             chTime("+")
             NSWorkspace.shared.launchApplication("Parallels Desktop")
             sleep(4)
             chTime("-")
-            run("/usr/local/bin/prlctl start \""+vm+"\"")
+            return true
         }
+        return false
+    }
+    
+    func getIcon(_ os: String) -> NSImage{
+        if ["win-11","win-10","ubuntu","fedora","fedora-core","debian","kali","centos","macos"].contains(os){
+            return NSImage(named:NSImage.Name(os))!
+        }else if os.contains("win")||os.contains("Win"){
+            return NSImage(named:NSImage.Name("win"))!
+        }else if ["redhat","mint","opensuse","manjaro", "arch", "linux", "lin"].contains(os){
+            return NSImage(named:NSImage.Name("linux"))!
+        }
+        return NSImage(named:NSImage.Name("other"))!
     }
     
     func constructMenu() {
         menu.removeAllItems()
-        let vmlist = runWithOutput("/usr/local/bin/prlctl list -ao name -s mac 2>/dev/null").output!.components(separatedBy: "\n")
+        let vmList = runWithOutput("/usr/local/bin/prlctl list -ao name -s mac 2>/dev/null").output!.components(separatedBy: "\n")
         let oslist = runWithOutput("/usr/local/bin/prlctl list -ao ostemplate -s mac 2>/dev/null").output!.components(separatedBy: "\n")
-        if vmlist[0] == "NAME" {
-            if vmlist.count == 1 {
+        if vmList[0] == "NAME" {
+            if vmList.count == 1 {
+                log("No VM are installed!")
                 menu.addItem(withTitle: NSLocalizedString("No VMs were found", comment: "未找到任何已安装的虚拟机"), action:nil, keyEquivalent: "")
-            }else if vmlist.count > 1 {
+            }else if vmList.count > 1 {
+                if vmList != vmListBak{
+                    vmListBak = vmList
+                    log("VM list: ["+vmList[1...vmList.count-1].joined(separator: ",")+"]")
+                }
                 var num = 1
-                for vm in vmlist[1..<vmlist.count] {
-                    let os = oslist[vmlist.firstIndex(of: vm)!]
-                    var icon = NSImage(named:NSImage.Name("Other"))
-                    if ["ubuntu","fedora","fedora-core","debina","kali","linux","centos","redhat","mint","opensuse","manjaro", "arch"].contains(os){
-                        icon = NSImage(named:NSImage.Name("Linux"))
-                    }else if os.contains("win")||os.contains("Win"){
-                        icon = NSImage(named:NSImage.Name("Win"))
-                    }else if os.contains("macos"){
-                        icon = NSImage(named:NSImage.Name("macOS"))
-                    }
+                for vm in vmList[1...vmList.count-1] {
+                    let os = oslist[vmList.firstIndex(of: vm)!]
+                    let icon = getIcon(os)
                     menu.addItem(withTitle: String(vm), action: #selector(AppDelegate.startVM(_:)), keyEquivalent: String(num)).image = icon
                     num += 1
                 }
@@ -267,6 +306,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
                 if UserDefaults.standard.bool(forKey: "runAtLogin") == true { menu.item(withTitle: NSLocalizedString("Launch at Login", comment: "登录时启动"))?.state = NSControl.StateValue.on }
             }
         } else {
+            log("Parallels Desktop not installed!")
             menu.addItem(withTitle: NSLocalizedString("Parallels Desktop not installed", comment: "未安装PD"), action:nil, keyEquivalent: "")
         }
         menu.addItem(NSMenuItem.separator())
@@ -278,7 +318,9 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     // MARK: AppProtocol Methods
 
     func log(_ log: String) {
-        print(log)
+        let df = DateFormatter()
+        df.dateFormat = "y-MM-dd H:m:ss.SSSS"
+        if debug {print(df.string(from: Date()),log)}
     }
 
     // MARK: -
@@ -287,22 +329,24 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
     func installHelper(){
         helperStatus() { installed in
             if !installed {
-                self.log("Helper Not Installed!")
+                self.log("Helper not installed!")
                 do {
+                    self.log("Try to install helper")
                     if try self.helperInstaller() {
                         self.log("Helper installed successfully.")
                     } else {
                         self.log("Failed install helper with unknown error.")
-                        //self.dialogOKCancel(question: NSLocalizedString("Failed to install helper!", comment: "安装帮助程序失败"), text: NSLocalizedString("Click OK to quit", comment: "点击OK退出程序"))
+                        NSAppleScript(source: "display dialog \"\(NSLocalizedString("Unknown error.", comment: "未知错误"))\" with title \"\(NSLocalizedString("Failed to install helper!", comment: "安装失败"))\" with icon 2")!.executeAndReturnError(nil)
                         exit(1)
                     }
                 } catch {
                     self.log("Failed to install helper with error: \(error)")
-                    //self.dialogOKCancel(question: NSLocalizedString("Failed to install helper!", comment: "安装帮助程序失败"), text: NSLocalizedString("Click OK to quit", comment: "点击OK退出程序"))
+                    let error = "\(error)"
+                    NSAppleScript(source: "display dialog \"\(error.replacingOccurrences(of: "\"", with: "\\\""))\" with title \"\(NSLocalizedString("Failed to install helper!", comment: "安装失败"))\" with icon 2")!.executeAndReturnError(nil)
                     exit(1)
                 }
             }else{
-                self.log("Helper Installed.")
+                self.log("Helper installed.")
             }
         }
     }
@@ -364,7 +408,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
         var cfError: Unmanaged<CFError>?
         var authItem = AuthorizationItem(name: kSMRightBlessPrivilegedHelper, valueLength: 0, value:UnsafeMutableRawPointer(bitPattern: 0), flags: 0)
         var authRights = AuthorizationRights(count: 1, items: &authItem)
-
+        log("Start installation...")
         guard
             let authRef = try HelperAuthorization.authorizationRef(&authRights, nil, [.interactionAllowed, .extendRights, .preAuthorize]),
             SMJobBless(kSMDomainSystemLaunchd, HelperConstants.machServiceName as CFString, authRef, &cfError) else {
@@ -372,8 +416,8 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
                 return false
         }
 
-        self.currentHelperConnection?.invalidate()
-        self.currentHelperConnection = nil
+        currentHelperConnection?.invalidate()
+        currentHelperConnection = nil
 
         return true
     }

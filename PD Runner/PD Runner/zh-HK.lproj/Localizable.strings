@@ -14,7 +14,8 @@
 "Stop all VMs" = "全部關機";
 "Block trial alert" = "屏蔽付費視窗";
 "Update VM List" = "更新虛擬機列表";
-"Failed to install helper!" = "安裝幫助程序失敗";
 "Click OK to exit" = "點OK退出程序";
 "Launch at Login" = "登入時啓動";
+"Failed to install helper!" = "輔助程式工具安装失败!";
+"Unknown error." = "未知錯誤";
 "For Parallels Desktop 17.1.0 or later, PD runner need to run with administrator privileges." = "對於 Parallels Desktop 17.1.0 或更高版本\nPD runner 需要管理員權限才能正常工作";

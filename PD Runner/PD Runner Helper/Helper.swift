@@ -141,8 +141,8 @@ class Helper: NSObject, NSXPCListenerDelegate, HelperProtocol {
 
         task.launchPath = "/bin/bash"
         task.arguments = ["-c", arguments]
-        task.standardOutput = stdOut
-        task.standardError = stdErr
+        //task.standardOutput = stdOut
+        //task.standardError = stdErr
 
         task.terminationHandler = { task in
             completion(NSNumber(value: task.terminationStatus))
