@@ -6,6 +6,8 @@
   
 */
 "Quit" = "結束";
+"OK" = "確認";
+"Cancel" = "取消";
 "About PD Runner" = "關於 PD Runner";
 "No VMs were found" = "沒有虛擬機";
 "Parallels Desktop not installed" = "沒有安裝Parallels Desktop";

@@ -9,7 +9,7 @@
 	<key>CFBundleName</key>
 	<string>com.lihaoyun6.PD-Runner-Helper</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.11</string>
+	<string>0.1.12</string>
 	<key>SMAuthorizedClients</key>
 	<array>
 		<string>identifier "com.lihaoyun6.PD-Runner" and anchor apple generic and certificate leaf[subject.CN] = "Apple Development: lihaoyun11@gmail.com (RLYLNV942Y)" and certificate 1[field.1.2.840.113635.100.6.2.1] /* exists */</string>
