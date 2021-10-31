@@ -203,6 +203,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
                 let ret = runWithOutput("echo \(pass)|/usr/local/bin/prlctl \(cmd) \"\(vm)\" 2>&1").output!.components(separatedBy: "\n").last!
                 if skipProCheck(ret){run("echo \(pass)|/usr/local/bin/prlctl \(cmd) \"\(vm)\"")}
                 chTime("+")
+                NSWorkspace.shared.launchApplication("Parallels Desktop")
             }else{
                 dialogOK(question: NSLocalizedString("No password entered", comment: "未输入密码"), text: "\"\(vm)\" "+NSLocalizedString("will not be started", comment: "将不会被启动"))
             }
@@ -211,6 +212,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, AppProtocol {
             let ret = runWithOutput("/usr/local/bin/prlctl \(cmd) \"\(vm)\" 2>&1").output!.components(separatedBy: "\n").last!
             if skipProCheck(ret){run("/usr/local/bin/prlctl \(cmd) \"\(vm)\"")}
             chTime("+")
+            NSWorkspace.shared.launchApplication("Parallels Desktop")
         }
     }
     

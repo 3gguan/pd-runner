@@ -8,6 +8,10 @@
 "Quit" = "結束";
 "OK" = "確認";
 "Cancel" = "取消";
+"Input password" = "請輸入密碼";
+"is encrypted" = "處於加密狀態";
+"No password entered" = "未輸入密碼";
+"will not be started" = "將不會啟動";
 "About PD Runner" = "關於 PD Runner";
 "No VMs were found" = "沒有虛擬機";
 "Parallels Desktop not installed" = "沒有安裝Parallels Desktop";

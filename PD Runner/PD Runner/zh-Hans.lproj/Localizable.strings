@@ -8,6 +8,10 @@
 "Quit" = "退出";
 "OK" = "确定";
 "Cancel" = "取消";
+"Input password" = "请输入密码";
+"is encrypted" = "处于加密状态";
+"No password entered" = "未输入密码";
+"will not be started" = "将不会启动";
 "About PD Runner" = "关于 PD Runner";
 "No VMs were found" = "无虚拟机";
 "Parallels Desktop not installed" = "未安装Parallels Desktop";
