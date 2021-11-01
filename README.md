@@ -35,4 +35,4 @@ PD Runner是一个菜单栏APP, 启动后会在菜单栏显示程序图标. 点�
 - 如果提示为"**"com.lihaoyun6.PD-Runner-Helper"将对您的电脑造成伤害。**"  
 <img src="./img/error1.png" width="180" />  
 
-> 这是因为我使用的临时开发者证书过期所致, 使用Release中附带的"Uninstall-Helper"清除旧版残余项目, 然后重新打开PD Runner既可  
+> 这是因为我使用的临时开发者证书过期所致, 可以使用诸如Clean My Mac的卸载工具卸载旧版本, 或使用Release中附带的"Uninstall-Helper"清除旧版残余项目, 然后重新打开PD Runner即可.  
