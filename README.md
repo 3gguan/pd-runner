@@ -26,6 +26,13 @@ PD Runner是一个菜单栏APP, 启动后会在菜单栏显示程序图标. 点�
 > 不需要, PD Runner可以全自动识别当前系统中的客户机, 并自动列出. 不要用户干预.  
 
 **4. 安装帮助程序时弹出错误提示怎么办?**  
-> 如果您看到的错误代码为"**Domain=CFError DomainLaunchd Code=9**", 请尝试在系统的"终端"APP中执行
+
+- 如果您看到的错误代码为"**Domain=CFError DomainLaunchd Code=9**"  
+
+> 请尝试在系统的"终端"APP中执行以下命令, 并输入密码, 然后再次启动PD Runner既可正常使用 (输入密码的过程是不显示密码的, 并不是没有输入进去, 正常输入并回车既可)   
 > `sudo launchctl enable system/com.lihaoyun6.PD-Runner-Helper`  
-> 并输入密码, 然后再次启动PD Runner既可正常使用 (输入密码的过程是不显示密码的, 并不是没有输入进去, 正常输入并回车既可)  
+
+- 如果提示为"**「com.lihaoyun6.PD-Runner-Helper"将对您的电脑造成伤害。**"  
+<img src="./img/error1.png" width="180" />  
+
+> 这是因为我使用的临时开发者证书过期所致, 使用Release中附带的"Uninstall-Helper"清除旧版残余项目, 然后重新打开PD Runner既可  

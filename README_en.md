@@ -28,6 +28,15 @@ PD Runner will show an icon in the menu bar. Click menubar icon to list all the 
 **3. Do I need to change the VM to a specific name to use it?**  
 > No, PD Runner can automatically list the VMs in the current system automatically.  
 
-**4. I get an error message when installing the helper**
-> If you see the error code "**Domain=CFError DomainLaunchd Code=9**", Please run the following command in Terminal and enter the password. Then restart PD Runner and it will work normally.  
+**4. I get an error message when installing the helper**  
+
+- If you see the error code "**Domain=CFError DomainLaunchd Code=9**"  
+
+> Please run the following command in Terminal and enter the password. Then restart PD Runner and it will work normally.  
 > `sudo launchctl enable system/com.lihaoyun6.PD-Runner-Helper`  
+
+- If the system say "**「com.lihaoyun6.pd-runner-helper」 will damage your computer.**"  
+<img src="./img/error1_en.png" width="180" />  
+
+> This is caused by the expiration of the temporary developer certificate I used. Use the "Uninstall-Helper" app included in the release to remove the residual items of the old version, and then reopen PD runner normally.  
+> 
