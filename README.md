@@ -4,9 +4,13 @@
 </p>
 <h1 align="center">PD Runner</h1>
 <h3 align="center">适用于Parallels Desktop的启动器, 可无视试用期限强制启动客户机 (支持 PD17.1.0)</h3> 
+
+<p style="color:red;font-weight:bold" align="center">
+因被奸商大量转售, 本软件即日起改为封闭源代码. 此页面仅用于发布预编译更新, 请大家谅解
+</p>
 <p align="center">
 本项目仅用于学习研究使用, 请支持正版!</br>
-<a href="./README_en.md">English Version</a>
+[<a href="https://github.com/lihaoyun6/PD-Runner/releases/latest">最新版本下载</a>] [<a href="./README_en.md">README in English</a>]
 </p>
 
 ## 运行截图

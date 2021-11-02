@@ -6,10 +6,15 @@
 <h3 align="center">A tool for Parallels Desktop can start VMs even the trial period has expired</br>
 (Support for PD17.1.0 or earlier)</h3> 
 
-<p align="center">
-Only for learning and research use, please support the genuine</br>
-<a href="./README.md">中文版本</a>
+<p style="color:red;font-weight:bold" align="center">
+As PD Runner is used by some people to make sales profit, this software will be changed to closed source software.</br>
+This repository is only used to release pre-compiled updates.
 </p>
+<p align="center">
+Only for learning and research use, please support the genuine!</br>
+[<a href="https://github.com/lihaoyun6/PD-Runner/releases/latest">最新版本下载</a>] [<a href="./README.md">中文README</a>]
+</p>
+
 
 ## Screenshot
 <img src="./img/Screenshot.png" width=920 align=center />  
